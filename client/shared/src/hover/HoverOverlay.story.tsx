@@ -7,7 +7,7 @@ import browserExtensionStyles from '@sourcegraph/browser/src/app.scss'
 import { NotificationType } from '../api/extension/extensionHostApi'
 import { registerHighlightContributions } from '../highlight/contributions'
 
-import { HoverOverlay, HoverOverlayClassProps } from './HoverOverlay'
+import { HoverOverlay, HoverOverlayClassProps, HoverOverlayProps } from './HoverOverlay'
 import { commonProps, FIXTURE_ACTIONS, FIXTURE_CONTENT, FIXTURE_SEMANTIC_BADGE } from './HoverOverlay.fixtures'
 
 registerHighlightContributions()
@@ -29,13 +29,14 @@ const bitbucketClassProps: HoverOverlayClassProps = {
     },
 }
 
-add('Bitbucket styles', () => (
+const storyFnFactory = (props: Partial<HoverOverlayProps> = {}) => () => (
     <>
         <style>{bitbucketStyles}</style>
         <style>{browserExtensionStyles}</style>
         <HoverOverlay
             {...commonProps()}
             {...bitbucketClassProps}
+            {...props}
             hoverOrError={{
                 contents: [FIXTURE_CONTENT],
                 aggregatedBadges: [FIXTURE_SEMANTIC_BADGE],
@@ -43,4 +44,7 @@ add('Bitbucket styles', () => (
             actionsOrError={FIXTURE_ACTIONS}
         />
     </>
-))
+)
+
+add('Bitbucket styles', storyFnFactory())
+add('Branded', storyFnFactory({ isBranded: true }))
