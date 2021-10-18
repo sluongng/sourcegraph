@@ -598,7 +598,7 @@ func publishExecutor(version string, skipHashCompare bool) operations.Operation 
 			bk.Env("VERSION", version),
 		}
 		if !skipHashCompare {
-			// Publish iff not soft-failed on previous step
+			// Publish if not soft-failed on previous step
 			checkDependencySoftFailScript := "./enterprise/dev/ci/scripts/check-dependency-soft-fail.sh"
 			stepOpts = append(stepOpts,
 				// Soft-fail with code 222 if nothing has changed
@@ -609,5 +609,37 @@ func publishExecutor(version string, skipHashCompare bool) operations.Operation 
 			bk.Cmd("./enterprise/cmd/executor/release.sh"))
 
 		pipeline.AddStep(":packer: :white_check_mark: executor image", stepOpts...)
+	}
+}
+
+// TODO(JH) drop this simulating steps
+func fault() operations.Operation {
+	return func(pipeline *bk.Pipeline) {
+		stepOpts := []bk.StepOpt{
+			bk.Cmd("fail here"),
+			bk.Key("failing"),
+		}
+		pipeline.AddEnsureStep(":red_circle: failing on purpose", stepOpts...)
+	}
+}
+
+// TODO(JH) drop this simulating steps
+func depfault() operations.Operation {
+	return func(pipeline *bk.Pipeline) {
+		stepOpts := []bk.StepOpt{
+			bk.Cmd("ls -al"),
+			bk.DependsOn("failing"),
+		}
+		pipeline.AddEnsureStep(":question: dep on the failing step", stepOpts...)
+	}
+}
+
+func uploadBuildLogs() operations.Operation {
+	return func(pipeline *bk.Pipeline) {
+		stepOpts := []bk.StepOpt{
+			bk.AllowDependencyFailure(),
+			bk.Cmd("./enterprise/dev/upload-build-logs.sh"),
+		}
+		pipeline.AddEnsureStep(":file_cabinet: Uploading build logs", stepOpts...)
 	}
 }
