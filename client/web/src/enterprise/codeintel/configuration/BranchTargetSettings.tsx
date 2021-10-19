@@ -1,12 +1,18 @@
 import { debounce } from 'lodash'
-import React, { FunctionComponent, useState, useMemo } from 'react'
+import React, { FunctionComponent, useMemo, useState } from 'react'
+
+import { Button } from '@sourcegraph/wildcard'
+import { Tooltip } from '@sourcegraph/branded/src/components/tooltip/Tooltip'
 
 import { CodeIntelligenceConfigurationPolicyFields, GitObjectType } from '../../../graphql-operations'
 
 import { GitObjectPreview } from './GitObjectPreview'
-import { RepositoryPreview } from './RepositoryPreview'
+import styles from './BranchTargetSettings.module.scss'
+import TrashIcon from 'mdi-react/TrashIcon'
+import classNames from 'classnames'
 
 const DEBOUNCED_WAIT = 250
+
 export interface BranchTargetSettingsProps {
     repoId?: string
     policy: CodeIntelligenceConfigurationPolicyFields
@@ -44,46 +50,56 @@ export const BranchTargetSettings: FunctionComponent<BranchTargetSettingsProps> 
             {!repoId && (
                 <>
                     {repositoryPatterns.length === 0 ? (
-                        <>
-                            <p>Something special here</p>
-
-                            <button
-                                className="btn btn-primary"
+                        <div>
+                            This configuration policy applies to all repositories. To restrict the set of repositories
+                            to which this configuration applies,{' '}
+                            <span
+                                className={styles.addFirstRepositoryPattern}
                                 onClick={() => setRepositoryPatterns(repositoryPatterns.concat(['']))}
                             >
-                                add first repository pattern
-                            </button>
-                        </>
+                                add a repository pattern
+                            </span>
+                            .
+                        </div>
                     ) : (
-                        <>
+                        <div className={styles.grid}>
                             {repositoryPatterns.map((p, i) => (
-                                <div className="form-group" key={i}>
-                                    <label htmlFor="repo-pattern">Repository pattern #{i + 1}</label>
-                                    <input
-                                        id={`repo-pattern-${i}`}
-                                        type="text"
-                                        className="form-control text-monospace"
-                                        value={repositoryPatterns[i]}
-                                        onChange={({ target }) =>
-                                            setRepositoryPatterns(
-                                                repositoryPatterns.map((p, j) => (i === j ? target.value : p))
-                                            )
-                                        }
-                                        disabled={disabled}
-                                        required={true}
-                                    />
+                                <React.Fragment key={i}>
+                                    <div className={classNames(styles.name, 'form-group d-flex flex-column')}>
+                                        <label htmlFor="repo-pattern">Repository pattern #{i + 1}</label>
+                                        <input
+                                            id={`repo-pattern-${i}`}
+                                            type="text"
+                                            className="form-control text-monospace"
+                                            value={repositoryPatterns[i]}
+                                            onChange={({ target }) =>
+                                                setRepositoryPatterns(
+                                                    repositoryPatterns.map((p, j) => (i === j ? target.value : p))
+                                                )
+                                            }
+                                            disabled={disabled}
+                                            required={true}
+                                        />
+                                    </div>
 
-                                    <button
-                                        className="btn btn-danger"
-                                        onClick={() =>
-                                            setRepositoryPatterns(repositoryPatterns.filter((_, j) => i !== j))
-                                        }
-                                    >
-                                        remove me
-                                    </button>
+                                    <span className={classNames(styles.button, 'd-none d-md-inline')}>
+                                        <Button
+                                            onClick={() =>
+                                                setRepositoryPatterns(repositoryPatterns.filter((_, j) => i !== j))
+                                            }
+                                            className="p-0 m-0 pt-1"
+                                            disabled={disabled}
+                                        >
+                                            <Tooltip />
+                                            <TrashIcon
+                                                className="icon-inline text-danger"
+                                                data-tooltip="Delete the repository pattern"
+                                            />
+                                        </Button>
+                                    </span>
 
-                                    <RepositoryPreview pattern={p} />
-                                </div>
+                                    {/* <RepositoryPreview pattern={p} /> */}
+                                </React.Fragment>
                             ))}
 
                             <button
@@ -92,7 +108,7 @@ export const BranchTargetSettings: FunctionComponent<BranchTargetSettingsProps> 
                             >
                                 add new repository pattern
                             </button>
-                        </>
+                        </div>
                     )}
                 </>
             )}
