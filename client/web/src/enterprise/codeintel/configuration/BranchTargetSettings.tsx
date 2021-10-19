@@ -11,7 +11,6 @@ import styles from './BranchTargetSettings.module.scss'
 import TrashIcon from 'mdi-react/TrashIcon'
 import classNames from 'classnames'
 import { RepositoryPreview } from './RepositoryPreview'
-import PlusIcon from 'mdi-react/PlusIcon'
 
 const DEBOUNCED_WAIT = 250
 
