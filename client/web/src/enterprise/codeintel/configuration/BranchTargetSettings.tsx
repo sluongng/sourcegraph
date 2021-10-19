@@ -10,6 +10,8 @@ import { GitObjectPreview } from './GitObjectPreview'
 import styles from './BranchTargetSettings.module.scss'
 import TrashIcon from 'mdi-react/TrashIcon'
 import classNames from 'classnames'
+import { RepositoryPreview } from './RepositoryPreview'
+import PlusIcon from 'mdi-react/PlusIcon'
 
 const DEBOUNCED_WAIT = 250
 
@@ -50,64 +52,78 @@ export const BranchTargetSettings: FunctionComponent<BranchTargetSettingsProps> 
             {!repoId && (
                 <>
                     {repositoryPatterns.length === 0 ? (
-                        <div>
-                            This configuration policy applies to all repositories. To restrict the set of repositories
-                            to which this configuration applies,{' '}
-                            <span
-                                className={styles.addFirstRepositoryPattern}
-                                onClick={() => setRepositoryPatterns(repositoryPatterns.concat(['']))}
-                            >
-                                add a repository pattern
-                            </span>
-                            .
+                        <div className="mb-2">
+                            This configuration policy applies to all repositories.{' '}
+                            {!disabled && (
+                                <>
+                                    To restrict the set of repositories to which this configuration applies,{' '}
+                                    <span
+                                        className={styles.addRepositoryPattern}
+                                        onClick={() => setRepositoryPatterns(repositoryPatterns.concat(['']))}
+                                    >
+                                        add a repository pattern
+                                    </span>
+                                    .
+                                </>
+                            )}
                         </div>
                     ) : (
-                        <div className={styles.grid}>
-                            {repositoryPatterns.map((p, i) => (
-                                <React.Fragment key={i}>
-                                    <div className={classNames(styles.name, 'form-group d-flex flex-column')}>
-                                        <label htmlFor="repo-pattern">Repository pattern #{i + 1}</label>
-                                        <input
-                                            id={`repo-pattern-${i}`}
-                                            type="text"
-                                            className="form-control text-monospace"
-                                            value={repositoryPatterns[i]}
-                                            onChange={({ target }) =>
-                                                setRepositoryPatterns(
-                                                    repositoryPatterns.map((p, j) => (i === j ? target.value : p))
-                                                )
-                                            }
-                                            disabled={disabled}
-                                            required={true}
-                                        />
-                                    </div>
-
-                                    <span className={classNames(styles.button, 'd-none d-md-inline')}>
-                                        <Button
-                                            onClick={() =>
-                                                setRepositoryPatterns(repositoryPatterns.filter((_, j) => i !== j))
-                                            }
-                                            className="p-0 m-0 pt-1"
-                                            disabled={disabled}
-                                        >
-                                            <Tooltip />
-                                            <TrashIcon
-                                                className="icon-inline text-danger"
-                                                data-tooltip="Delete the repository pattern"
+                        <div className="mb-2">
+                            <div className={styles.grid}>
+                                {repositoryPatterns.map((p, i) => (
+                                    <React.Fragment key={i}>
+                                        <div className={classNames(styles.name, 'form-group d-flex flex-column mb-0')}>
+                                            <label htmlFor="repo-pattern">Repository pattern #{i + 1}</label>
+                                            <input
+                                                id={`repo-pattern-${i}`}
+                                                type="text"
+                                                className="form-control text-monospace"
+                                                value={repositoryPatterns[i]}
+                                                onChange={({ target }) =>
+                                                    setRepositoryPatterns(
+                                                        repositoryPatterns.map((p, j) => (i === j ? target.value : p))
+                                                    )
+                                                }
+                                                disabled={disabled}
+                                                required={true}
                                             />
-                                        </Button>
-                                    </span>
+                                        </div>
 
-                                    {/* <RepositoryPreview pattern={p} /> */}
-                                </React.Fragment>
-                            ))}
+                                        <span className={classNames(styles.button, 'd-none d-md-inline')}>
+                                            <Button
+                                                onClick={() =>
+                                                    setRepositoryPatterns(repositoryPatterns.filter((_, j) => i !== j))
+                                                }
+                                                className="p-0 m-0 pt-4"
+                                                disabled={disabled}
+                                            >
+                                                <Tooltip />
+                                                <TrashIcon
+                                                    className="icon-inline text-danger"
+                                                    data-tooltip="Delete the repository pattern"
+                                                />
+                                            </Button>
+                                        </span>
 
-                            <button
-                                className="btn btn-primary"
-                                onClick={() => setRepositoryPatterns(repositoryPatterns.concat(['']))}
-                            >
-                                add new repository pattern
-                            </button>
+                                        <div className={classNames(styles.preview, 'form-group d-flex flex-column')}>
+                                            <RepositoryPreview pattern={p} />
+                                        </div>
+                                    </React.Fragment>
+                                ))}
+                            </div>
+
+                            {!disabled && (
+                                <>
+                                    <div className="pb-2">
+                                        <span
+                                            className={classNames(styles.addRepositoryPattern)}
+                                            onClick={() => setRepositoryPatterns(repositoryPatterns.concat(['']))}
+                                        >
+                                            Add a repository pattern
+                                        </span>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
                 </>
