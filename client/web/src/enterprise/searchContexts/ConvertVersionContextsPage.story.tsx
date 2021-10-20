@@ -2,7 +2,7 @@ import { storiesOf } from '@storybook/react'
 import React from 'react'
 import { of } from 'rxjs'
 
-import { EnterpriseWebStory } from '../components/EnterpriseWebStory'
+import { WebStory } from '../../components/WebStory'
 
 import { ConvertVersionContextsPageProps, ConvertVersionContextsPage } from './ConvertVersionContextsPage'
 
@@ -38,18 +38,14 @@ const defaultProps: ConvertVersionContextsPageProps = {
     convertVersionContextToSearchContext: (name: string) => of({ id: name, spec: name }),
 }
 
-add(
-    'default',
-    () => <EnterpriseWebStory>{() => <ConvertVersionContextsPage {...defaultProps} />}</EnterpriseWebStory>,
-    {}
-)
+add('default', () => <WebStory>{() => <ConvertVersionContextsPage {...defaultProps} />}</WebStory>, {})
 
 add(
     'all converted',
     () => (
-        <EnterpriseWebStory>
+        <WebStory>
             {() => <ConvertVersionContextsPage {...defaultProps} isSearchContextSpecAvailable={() => of(true)} />}
-        </EnterpriseWebStory>
+        </WebStory>
     ),
     {}
 )
