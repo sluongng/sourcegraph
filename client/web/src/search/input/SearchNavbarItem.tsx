@@ -54,7 +54,7 @@ export const SearchNavbarItem: React.FunctionComponent<Props> = (props: Props) =
     const { queryState, setQueryState, submitSearch } = useNavbarQueryState()
 
     const submitSearchOnChange = useCallback(
-        (parameters: Partial<SubmitSearchParameters>) => {
+        (parameters: Partial<SubmitSearchParameters> = {}) => {
             submitSearch({
                 history: props.history,
                 patternType: props.patternType,
@@ -76,9 +76,9 @@ export const SearchNavbarItem: React.FunctionComponent<Props> = (props: Props) =
     )
 
     const onSubmit = useCallback(
-        (event?: React.FormEvent): void => {
+        (event?: React.FormEvent<HTMLFormElement>): void => {
             event?.preventDefault()
-            submitSearchOnChange({})
+            submitSearchOnChange()
         },
         [submitSearchOnChange]
     )

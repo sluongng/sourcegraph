@@ -84,7 +84,7 @@ export const SearchPageInput: React.FunctionComponent<Props> = (props: Props) =>
     })
 
     const submitSearchOnChange = useCallback(
-        (parameters: Partial<SubmitSearchParameters>) => {
+        (parameters: Partial<SubmitSearchParameters> = {}) => {
             const query = props.hiddenQueryPrefix
                 ? `${props.hiddenQueryPrefix} ${userQueryState.query}`
                 : userQueryState.query
@@ -114,9 +114,9 @@ export const SearchPageInput: React.FunctionComponent<Props> = (props: Props) =>
     )
 
     const onSubmit = useCallback(
-        (event?: React.FormEvent): void => {
+        (event?: React.FormEvent<HTMLFormElement>): void => {
             event?.preventDefault()
-            submitSearchOnChange({})
+            submitSearchOnChange()
         },
         [submitSearchOnChange]
     )
