@@ -24,7 +24,8 @@ SET
 	started_at = %s,
 	finished_at = %s,
 	cancel = %s,
-	worker_hostname = %s
+	worker_hostname = %s,
+	failure_message = %s
 WHERE
 	id = %s
 `
@@ -36,6 +37,7 @@ WHERE
 		nullTimeColumn(job.FinishedAt),
 		job.Cancel,
 		job.WorkerHostname,
+		job.FailureMessage,
 		job.ID,
 	)
 	if err := s.Exec(ctx, q); err != nil {

@@ -189,6 +189,8 @@ type ListBatchSpecWorkspaceExecutionJobsOpts struct {
 	WorkerHostname        string
 	BatchSpecWorkspaceIDs []int64
 	IDs                   []int64
+	WithFailureMessage    bool
+	BatchSpecID           int64
 }
 
 // ListBatchSpecWorkspaceExecutionJobs lists batch changes with the given filters.
@@ -214,12 +216,14 @@ func (s *Store) ListBatchSpecWorkspaceExecutionJobs(ctx context.Context, opts Li
 var listBatchSpecWorkspaceExecutionJobsQueryFmtstr = `
 -- source: enterprise/internal/batches/store/batch_spec_workspace_execution_jobs.go:ListBatchSpecWorkspaceExecutionJobs
 SELECT %s FROM batch_spec_workspace_execution_jobs
-WHERE %s
+%s       -- joins
+WHERE %s -- preds
 ORDER BY id ASC
 `
 
 func listBatchSpecWorkspaceExecutionJobsQuery(opts ListBatchSpecWorkspaceExecutionJobsOpts) *sqlf.Query {
 	var preds []*sqlf.Query
+	var joins []*sqlf.Query
 
 	if opts.State != "" {
 		preds = append(preds, sqlf.Sprintf("batch_spec_workspace_execution_jobs.state = %s", opts.State))
@@ -241,6 +245,16 @@ func listBatchSpecWorkspaceExecutionJobsQuery(opts ListBatchSpecWorkspaceExecuti
 		preds = append(preds, sqlf.Sprintf("batch_spec_workspace_execution_jobs.id = ANY (%s)", pq.Array(opts.IDs)))
 	}
 
+	if opts.WithFailureMessage {
+		preds = append(preds, sqlf.Sprintf("batch_spec_workspace_execution_jobs.state IN ('errored', 'failed')"))
+		preds = append(preds, sqlf.Sprintf("batch_spec_workspace_execution_jobs.failure_message IS NOT NULL"))
+	}
+
+	if opts.BatchSpecID != 0 {
+		joins = append(joins, sqlf.Sprintf("JOIN batch_spec_workspaces ON batch_spec_workspace_execution_jobs.batch_spec_workspace_id = batch_spec_workspaces.id"))
+		preds = append(preds, sqlf.Sprintf("batch_spec_workspaces.batch_spec_id = %d", opts.BatchSpecID))
+	}
+
 	if len(preds) == 0 {
 		preds = append(preds, sqlf.Sprintf("TRUE"))
 	}
@@ -248,6 +262,7 @@ func listBatchSpecWorkspaceExecutionJobsQuery(opts ListBatchSpecWorkspaceExecuti
 	return sqlf.Sprintf(
 		listBatchSpecWorkspaceExecutionJobsQueryFmtstr,
 		sqlf.Join(BatchSpecWorkspaceExecutionJobColums.ToSqlf(), ", "),
+		sqlf.Join(joins, "\n"),
 		sqlf.Join(preds, "\n AND "),
 	)
 }
